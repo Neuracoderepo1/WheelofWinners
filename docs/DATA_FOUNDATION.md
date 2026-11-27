@@ -10,6 +10,8 @@ Recorded live migration history:
 - 20261127090012 wheelofwinners_initial_loyalty_foundation
 - 20261127090025 wheelofwinners_foreign_key_indexes
 - 20261127091705 wheelofwinners_supabase_auth_identity
+- 20261127091930 wheelofwinners_transactional_rewards
+- 202611270920xx wheelofwinners_server_only_redemption_rpc (exact version recorded in live migration history)
 
 The repository migration files are maintained as the reviewable source counterpart. The second migration adds ten foreign-key indexes verified against the live catalog. No secrets or credentials belong in this repository.
 
@@ -18,6 +20,8 @@ The repository migration files are maintained as the reviewable source counterpa
 - 001_initial_loyalty_foundation.sql: core tables, constraints, append-only ledger trigger, and deny-by-default RLS.
 - 002_foreign_key_indexes.sql: ten indexes for foreign-key lookup paths.
 - 003_supabase_auth_identity.sql: links `profiles.id` to `auth.users(id)` with `ON DELETE CASCADE` and creates a minimal profile row from a server-side Auth insert trigger.
+- 004_transactional_rewards.sql: adds an idempotent, cap-enforcing server-only engagement award function and an atomic fixed-price redemption function.
+- 005_server_only_redemption_rpc.sql: tightens redemption execution to `service_role` only. The application server must verify the user's Auth session and derive the user ID before calling it; never accept a user ID from browser input.
 
 The migrations target PostgreSQL 15+. The Auth identity migration is applied and catalog-verified: the profile foreign key and Auth user trigger both exist. The project currently has zero Auth users and zero profile rows, so no user data was backfilled.
 
@@ -35,6 +39,13 @@ The migrations target PostgreSQL 15+. The Auth identity migration is applied and
 ## Not implemented
 
 This schema does not yet implement the transactional earning/redemption service, membership authorization policies, provider signature adapters, campaign cap enforcement, vendor state-transition authorization, inventory reservation RPC, or reconciliation jobs. No production users, campaigns, points, rewards, or redemptions have been seeded. Do not treat this foundation as production-ready.
+
+## Transactional RPC security boundary
+
+- Both functions are `SECURITY DEFINER` with an empty `search_path` and are owned by `postgres`.
+- `award_verified_engagement` is executable only by `service_role`; provider verification must occur before invocation in a trusted server adapter.
+- `redeem_reward` is executable only by `service_role`. The API server must validate the user's access token with Supabase Auth and pass only the verified user ID. Never expose a service-role key to browser code.
+- These RPCs are database primitives, not a complete application API. They have not yet been exercised with real or synthetic user/reward data.
 
 ## Required database tests before real activity
 
