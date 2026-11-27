@@ -1,9 +1,16 @@
-import { describe, expect, it } from "vitest";
-import { isIdempotencyKey, isUuid } from "./supabase-server";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  callRedemptionRpc,
+  isIdempotencyKey,
+  isUuid,
+  verifySupabaseAccessToken,
+} from "./supabase-server";
+
+const userId = "b3f2f6b0-8c85-4e2a-9b65-8c1f0e4a3d11";
 
 describe("server request validation", () => {
   it("accepts canonical UUIDs and rejects malformed identifiers", () => {
-    expect(isUuid("b3f2f6b0-8c85-4e2a-9b65-8c1f0e4a3d11")).toBe(true);
+    expect(isUuid(userId)).toBe(true);
     expect(isUuid("not-a-uuid")).toBe(false);
     expect(isUuid(null)).toBe(false);
   });
@@ -13,5 +20,66 @@ describe("server request validation", () => {
     expect(isIdempotencyKey("short")).toBe(false);
     expect(isIdempotencyKey("bad key value")).toBe(false);
     expect(isIdempotencyKey("x".repeat(129))).toBe(false);
+  });
+});
+
+describe("Supabase server adapter", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.unstubAllEnvs();
+  });
+
+  it("derives identity only from Supabase Auth's verified user response", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_ANON_KEY", "anon-test-key");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "server-only-test-key");
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ id: userId }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(verifySupabaseAccessToken("valid-access-token")).resolves.toEqual({ id: userId });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://example.supabase.co/auth/v1/user",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          apikey: "anon-test-key",
+          Authorization: "Bearer valid-access-token",
+        }),
+        cache: "no-store",
+      }),
+    );
+  });
+
+  it("passes only the server-verified identity to the restricted redemption RPC", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_ANON_KEY", "anon-test-key");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "server-only-test-key");
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ status: "reserved", redemption_id: userId }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await callRedemptionRpc({
+      userId,
+      rewardId: "a2f2f6b0-8c85-4e2a-9b65-8c1f0e4a3d12",
+      idempotencyKey: "redeem:order_123",
+    });
+
+    expect(result.ok).toBe(true);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://example.supabase.co/rest/v1/rpc/redeem_reward",
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          apikey: "server-only-test-key",
+          Authorization: "Bearer server-only-test-key",
+        }),
+        body: JSON.stringify({
+          p_user_id: userId,
+          p_reward_id: "a2f2f6b0-8c85-4e2a-9b65-8c1f0e4a3d12",
+          p_idempotency_key: "redeem:order_123",
+        }),
+      }),
+    );
   });
 });
