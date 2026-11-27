@@ -13,7 +13,7 @@ Recorded live migration history:
 - 20261127091930 wheelofwinners_transactional_rewards
 - 20261127092011 wheelofwinners_server_only_redemption_rpc
 - 20261127092258 wheelofwinners_ledger_effect_uniqueness
-- 2026112709xxxx wheelofwinners_consumer_read_apis (exact version recorded in live migration history)
+- 20261127092401 wheelofwinners_consumer_read_apis
 
 The repository migration files are maintained as the reviewable source counterpart. The second migration adds ten foreign-key indexes verified against the live catalog. No secrets or credentials belong in this repository.
 
