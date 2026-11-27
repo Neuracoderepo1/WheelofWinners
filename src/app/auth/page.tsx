@@ -5,12 +5,8 @@ import { FormEvent, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 
-type AuthStage = "email" | "code";
-
 export default function AuthPage() {
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [stage, setStage] = useState<AuthStage>("email");
   const [session, setSession] = useState<Session | null>(null);
   const [balance, setBalance] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -70,7 +66,7 @@ export default function AuthPage() {
     return () => { active = false; };
   }, [session?.access_token]);
 
-  async function requestCode(event: FormEvent<HTMLFormElement>) {
+  async function requestSignInLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError("");
@@ -79,35 +75,15 @@ export default function AuthPage() {
       const client = getSupabaseBrowserClient();
       const { error: requestError } = await client.auth.signInWithOtp({
         email: email.trim().toLowerCase(),
-        options: { shouldCreateUser: true },
+        options: {
+          shouldCreateUser: true,
+          emailRedirectTo: `${window.location.origin}/auth`,
+        },
       });
       if (requestError) throw requestError;
-      setStage("code");
-      setMessage("A one-time code has been requested. Check your inbox and spam folder.");
+      setMessage("Sign-in email requested. Open the one-time link in your inbox to finish signing in. If it is not there, check your spam folder.");
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "We could not send your code. Please try again.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function verifyCode(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setError("");
-    setMessage("");
-    try {
-      const client = getSupabaseBrowserClient();
-      const { error: verifyError } = await client.auth.verifyOtp({
-        email: email.trim().toLowerCase(),
-        token: code.trim(),
-        type: "email",
-      });
-      if (verifyError) throw verifyError;
-      setMessage("Email verified. Your session is now active.");
-      setCode("");
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "That code could not be verified. Request a fresh one.");
+      setError(caught instanceof Error ? caught.message : "We could not send your sign-in email. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -120,7 +96,6 @@ export default function AuthPage() {
       const { error: signOutError } = await getSupabaseBrowserClient().auth.signOut();
       if (signOutError) throw signOutError;
       setBalance(null);
-      setStage("email");
       setMessage("You have been signed out.");
     } catch {
       setError("We could not complete sign-out. Please retry.");
@@ -154,21 +129,12 @@ export default function AuthPage() {
         ) : (
           <>
             <h1 id="auth-title">A simpler way<br /><em>to sign in.</em></h1>
-            <p className="auth-intro">Use your email address. We’ll send a one-time code, so there’s no password to remember.</p>
-            {stage === "email" ? (
-              <form className="auth-form" onSubmit={requestCode}>
-                <label htmlFor="email">Email address</label>
-                <input id="email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
-                <button className="button button-primary auth-submit" type="submit" disabled={busy || !email.trim()}>{busy ? "Sending code…" : "Send one-time code"}</button>
-              </form>
-            ) : (
-              <form className="auth-form" onSubmit={verifyCode}>
-                <label htmlFor="otp">Six-digit email code</label>
-                <input id="otp" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" minLength={6} maxLength={6} required value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="000000" />
-                <button className="button button-primary auth-submit" type="submit" disabled={busy || code.length !== 6}>{busy ? "Verifying…" : "Verify and continue"}</button>
-                <button className="auth-secondary" type="button" onClick={() => { setStage("email"); setCode(""); setError(""); }}>Use a different email</button>
-              </form>
-            )}
+            <p className="auth-intro">Enter your email and we’ll send a secure, one-time sign-in link. No password to remember.</p>
+            <form className="auth-form" onSubmit={requestSignInLink}>
+              <label htmlFor="email">Email address</label>
+              <input id="email" type="email" autoComplete="email" required maxLength={254} value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" />
+              <button className="button button-primary auth-submit" type="submit" disabled={busy || !email.trim()}>{busy ? "Sending sign-in email…" : "Email me a sign-in link"}</button>
+            </form>
           </>
         )}
         {message && <p className="auth-message" role="status">{message}</p>}
