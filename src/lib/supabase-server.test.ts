@@ -29,10 +29,14 @@ describe("Supabase server adapter", () => {
     vi.unstubAllEnvs();
   });
 
-  it("derives identity only from Supabase Auth's verified user response", async () => {
+  function stubValidConfig() {
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
     vi.stubEnv("SUPABASE_ANON_KEY", "anon-test-key");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "server-only-test-key");
+  }
+
+  it("derives identity only from Supabase Auth's verified user response", async () => {
+    stubValidConfig();
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ id: userId }), { status: 200 }),
     );
@@ -51,10 +55,34 @@ describe("Supabase server adapter", () => {
     );
   });
 
-  it("passes only the server-verified identity to the restricted redemption RPC", async () => {
-    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+  it("rejects an access token when Supabase Auth returns an unauthorized response", async () => {
+    stubValidConfig();
+    const fetchMock = vi.fn().mockResolvedValue(new Response("{}", { status: 401 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(verifySupabaseAccessToken("expired-or-forged-token")).resolves.toBeNull();
+  });
+
+  it("rejects a successful Auth response that does not contain a valid UUID identity", async () => {
+    stubValidConfig();
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ id: "not-a-user-id" }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(verifySupabaseAccessToken("token-with-invalid-response")).resolves.toBeNull();
+  });
+
+  it("rejects non-HTTPS Supabase endpoints outside local development", async () => {
+    vi.stubEnv("SUPABASE_URL", "http://example.supabase.co");
     vi.stubEnv("SUPABASE_ANON_KEY", "anon-test-key");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "server-only-test-key");
+
+    await expect(verifySupabaseAccessToken("any-token")).rejects.toThrow("SUPABASE_URL_INVALID");
+  });
+
+  it("passes only the server-verified identity to the restricted redemption RPC", async () => {
+    stubValidConfig();
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(JSON.stringify({ status: "reserved", redemption_id: userId }), { status: 200 }),
     );
