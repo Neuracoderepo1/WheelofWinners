@@ -9,6 +9,7 @@ The schema baseline and foreign-key index completion have been applied to the ex
 Recorded live migration history:
 - 20261127090012 wheelofwinners_initial_loyalty_foundation
 - 20261127090025 wheelofwinners_foreign_key_indexes
+- 20261127091705 wheelofwinners_supabase_auth_identity
 
 The repository migration files are maintained as the reviewable source counterpart. The second migration adds ten foreign-key indexes verified against the live catalog. No secrets or credentials belong in this repository.
 
@@ -16,8 +17,9 @@ The repository migration files are maintained as the reviewable source counterpa
 
 - 001_initial_loyalty_foundation.sql: core tables, constraints, append-only ledger trigger, and deny-by-default RLS.
 - 002_foreign_key_indexes.sql: ten indexes for foreign-key lookup paths.
+- 003_supabase_auth_identity.sql: links `profiles.id` to `auth.users(id)` with `ON DELETE CASCADE` and creates a minimal profile row from a server-side Auth insert trigger.
 
-The migrations target PostgreSQL 15+. profiles.id is not yet linked to auth.users(id); the server-side auth identity adapter remains follow-up work.
+The migrations target PostgreSQL 15+. The Auth identity migration is applied and catalog-verified: the profile foreign key and Auth user trigger both exist. The project currently has zero Auth users and zero profile rows, so no user data was backfilled.
 
 ## Security properties and current limitations
 
@@ -32,7 +34,7 @@ The migrations target PostgreSQL 15+. profiles.id is not yet linked to auth.user
 
 ## Not implemented
 
-This schema does not yet implement the transactional earning/redemption service, auth-provider foreign keys, membership authorization policies, provider signature adapters, campaign cap enforcement, vendor state-transition authorization, inventory reservation RPC, or reconciliation jobs. No production users, campaigns, points, rewards, or redemptions have been seeded. Do not treat this foundation as production-ready.
+This schema does not yet implement the transactional earning/redemption service, membership authorization policies, provider signature adapters, campaign cap enforcement, vendor state-transition authorization, inventory reservation RPC, or reconciliation jobs. No production users, campaigns, points, rewards, or redemptions have been seeded. Do not treat this foundation as production-ready.
 
 ## Required database tests before real activity
 
