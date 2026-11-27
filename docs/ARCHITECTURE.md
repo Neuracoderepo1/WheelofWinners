@@ -11,7 +11,7 @@
 ## Domain modules
 Identity and access; campaign management; engagement verification; points ledger; reward catalogue and inventory; redemption and fulfilment; vendor management; advertiser management; notifications; audit, support, and reporting.
 
-Keep domain logic in server-side services. Database policies are defense in depth, not a replacement for server authorization.
+Keep domain logic in server-side services. Database policies are defense in depth, not a replacement for server authorization. The database currently exposes two transactional primitives to `service_role` only: `award_verified_engagement` and `redeem_reward`. The application API must authenticate the consumer with Supabase Auth, derive the user ID from the verified session, and only then call the redemption RPC using its server-only service credential. Never pass through a client-supplied user ID or expose the service credential to the browser. The award RPC may be called only after a trusted provider adapter verifies the provider signature, event freshness, and campaign mapping.
 
 ## Suggested relational entities
 - profiles: user metadata and account status
@@ -35,26 +35,24 @@ Keep domain logic in server-side services. Database policies are defense in dept
 
 ### Grant points
 Within one database transaction:
-1. Validate provider signature and event authenticity in the trusted adapter.
-2. Insert the provider event under a unique provider/event identifier.
-3. If it already exists, return the prior result without a second grant.
-4. Validate campaign state, user eligibility, and all caps.
-5. Insert one immutable ledger credit.
-6. Update any cached balance in the same transaction.
-7. Commit.
+1. The trusted adapter validates provider signature, freshness, and campaign mapping before invoking the RPC.
+2. The RPC locks the campaign and consumer profile, then checks active campaign window, approved advertiser, and active account.
+3. Insert the provider event under a unique provider/event identifier; duplicates return without a second grant.
+4. Enforce per-user and total campaign event caps while holding the campaign lock.
+5. Insert one immutable ledger credit and audit event in the same transaction.
+6. Commit. Any cap or ledger failure rolls back the event insert as well.
 
 A client-provided verification flag is never accepted as evidence.
 
 ### Redeem points
 Within one database transaction:
-1. Require an authenticated consumer and a unique idempotency key.
-2. Lock the relevant points account and reward inventory row in a consistent order.
-3. Validate reward publication, schedule, eligibility, point cost, and available stock.
-4. Verify sufficient available points.
-5. Insert a redemption record.
-6. Insert an immutable ledger debit.
-7. Reserve inventory.
-8. Commit and return the redemption identifier.
+1. The application API validates the Supabase Auth session and derives the consumer ID server-side; only `service_role` may invoke the database RPC.
+2. The RPC locks the consumer profile, then checks the active account and idempotency key.
+3. Lock the published reward and its inventory; require an approved vendor and available stock.
+4. Calculate the authoritative balance from the ledger and verify sufficient points.
+5. Insert the redemption record and immutable ledger debit.
+6. Reserve inventory and write redemption/audit events.
+7. Commit and return the redemption identifier. Any failure rolls back all changes.
 
 Retries with the same idempotency key return the original redemption. Any failure rolls back all changes.
 
