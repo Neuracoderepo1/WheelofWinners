@@ -192,3 +192,9 @@ footer .brand{font-size:13px;color:var(--ink)}
 .wheel-hero .micro-note{max-width:440px;line-height:1.7}
 @media(max-width:760px){.wheel-hero{padding-top:48px;padding-bottom:50px}.wheel-stage{height:390px;margin-top:12px}.wheel-disk{width:min(340px,82vw)}.wheel-pointer{top:34px}.wheel-note-top{right:0;top:38px}.wheel-note-bottom{left:0;bottom:18px}}
 @media(max-width:520px){.wheel-stage{height:340px}.wheel-disk{width:min(300px,82vw);border-width:8px}.wheel-center-decoration{width:82px;height:82px;font-size:34px;border-width:6px}.wheel-hub{width:94px;height:94px}.wheel-hub strong{font-size:13px}.wheel-label{font-size:8px}.wheel-note{font-size:8px;padding:8px 10px}.wheel-note-top{right:-2px;top:26px}.wheel-note-bottom{left:-2px;bottom:10px}.wheel-caption{top:0}}
+
+
+/* Decorative motion only: the wheel navigates categories and never selects a prize. */
+@keyframes wheel-category-turn{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.wheel-stage:hover .wheel-disk,.wheel-stage:focus-within .wheel-disk{animation:wheel-category-turn 1.25s cubic-bezier(.2,.72,.25,1) both}
+@media(prefers-reduced-motion:reduce){.wheel-stage:hover .wheel-disk,.wheel-stage:focus-within .wheel-disk{animation:none}}
