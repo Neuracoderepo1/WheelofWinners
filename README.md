@@ -62,3 +62,11 @@ This repository is being initialized. These first commits establish the product 
 Copy `.env.example` to `.env.local` and set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`. The service-role key is server-only. Never use a `NEXT_PUBLIC_` prefix for it or commit real credentials.
 
 The redemption endpoint expects an Authorization bearer token and a JSON body containing an `idempotencyKey`. The caller must reuse the same key when retrying the same redemption request. Authentication UI/session lifecycle, provider verification, vendor/advertiser operations, rate limiting, and end-to-end integration tests remain outstanding.
+
+### Consumer email OTP authentication
+
+- `/auth` implements six-digit email OTP sign-in/sign-up and sign-out using the Supabase browser client.
+- Browser sessions persist and refresh through Supabase Auth; protected API requests send the access token as a bearer token.
+- The server independently verifies each bearer token and derives the consumer ID from Supabase Auth.
+- Configure both server and `NEXT_PUBLIC_` Supabase URL/anon-or-publishable-key variables. The service-role key remains server-only.
+- Before live use, configure the Supabase Email template to render `{{ .Token }}`, confirm email delivery/SMTP, and add the production site URL to Auth URL configuration. These dashboard settings cannot be inspected through the connected Supabase management tools and remain an explicit release gate.
