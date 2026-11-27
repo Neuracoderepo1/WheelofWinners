@@ -129,7 +129,7 @@ begin
 end;
 $$;
 
-create function public.redeem_reward(
+create or replace function public.redeem_reward(
   p_user_id uuid,
   p_reward_id uuid,
   p_idempotency_key text
