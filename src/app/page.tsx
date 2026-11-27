@@ -20,7 +20,7 @@ export default function HomePage() {
         <nav aria-label="Main navigation">
           <a href="#how-it-works">How it works</a>
           <a href="#rewards">Rewards</a>
-          <a className="nav-cta" href="#get-started">Get started</a>
+          <Link className="nav-cta" href="/auth">Sign in / Join</Link>
         </nav>
       </header>
 
@@ -31,7 +31,7 @@ export default function HomePage() {
           <p className="hero-text">Discover brand campaigns, earn points through eligible activities, and redeem them for rewards with clear prices and terms.</p>
           <div className="hero-actions">
             <a className="button button-primary" href="#rewards">Explore rewards <span aria-hidden="true">↗</span></a>
-            <a className="text-link" href="#how-it-works">See how it works</a>
+            <Link className="text-link" href="/auth">Create your account</Link>
           </div>
           <p className="micro-note">No random draws. No paid entries. Just transparent rewards.</p>
         </div>
@@ -71,7 +71,7 @@ export default function HomePage() {
         <p className="disclaimer">These are sample concepts, not live offers. No rewards, inventory, or point balances are currently connected.</p>
       </section>
 
-      <section className="closing" id="get-started"><div><p className="eyebrow">Built around clarity</p><h2>Your points.<br /><em>Your choice.</em></h2><p>When the platform opens, every reward will show exactly what it costs and how it gets to you.</p></div><div className="closing-stamp">GOOD<br />THINGS<br /><span>ADD UP</span> ✳</div></section>
+      <section className="closing" id="get-started"><div><p className="eyebrow">Built around clarity</p><h2>Your points.<br /><em>Your choice.</em></h2><p>When the platform opens, every reward will show exactly what it costs and how it gets to you.</p><Link className="button button-primary auth-home-cta" href="/auth">Join the rewards club <span aria-hidden="true">↗</span></Link></div><div className="closing-stamp">GOOD<br />THINGS<br /><span>ADD UP</span> ✳</div></section>
 
       <footer><Link className="brand" href="/"><span className="brand-mark">W</span> WheelofWinners</Link><span>Earn fairly. Redeem clearly.</span><span>© {new Date().getFullYear()} WheelofWinners</span></footer>
     </main>
