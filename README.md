@@ -41,8 +41,32 @@ The product must not implement spins for prizes, random winners, prize draws, lo
 ## Documentation
 - Product specification: docs/PRODUCT_SPEC.md
 - Architecture: docs/ARCHITECTURE.md
+- API contracts: docs/API.md
 - Security model: docs/SECURITY_MODEL.md
 - Roadmap: docs/ROADMAP.md
 
 ## Repository status
 This repository is being initialized. These first commits establish the product boundary, architecture, security model, and delivery sequence. No production system, vendor integrations, ad-provider callbacks, or fulfilment integrations are implied until implemented and verified.
+
+
+## Current engineering status
+
+- The deterministic loyalty schema and nine Supabase migrations are applied to the selected development project.
+- Supabase Auth profile linking is in place.
+- Transactional, idempotent points-award and fixed-price redemption database functions are restricted to the server `service_role`. Partial unique indexes enforce one earn per verified event and one debit per redemption.
+- Server routes provide `GET /api/rewards`, authenticated `GET /api/me/points`, and authenticated `POST /api/rewards/{rewardId}/redeem`. User identity is derived from Supabase Auth verification on the server.
+- No users, campaigns, points, rewards, or redemptions have been seeded. The UI remains illustrative and the platform is not production-ready.
+
+### Local server configuration
+
+Copy `.env.example` to `.env.local` and set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`. The service-role key is server-only. Never use a `NEXT_PUBLIC_` prefix for it or commit real credentials.
+
+The redemption endpoint expects an Authorization bearer token and a JSON body containing an `idempotencyKey`. The caller must reuse the same key when retrying the same redemption request. Authentication UI/session lifecycle, provider verification, vendor/advertiser operations, rate limiting, and end-to-end integration tests remain outstanding.
+
+### Consumer email OTP authentication
+
+- `/auth` implements six-digit email OTP sign-in/sign-up and sign-out using the Supabase browser client.
+- Browser sessions persist and refresh through Supabase Auth; protected API requests send the access token as a bearer token.
+- The server independently verifies each bearer token and derives the consumer ID from Supabase Auth.
+- Configure both server and `NEXT_PUBLIC_` Supabase URL/anon-or-publishable-key variables. The service-role key remains server-only.
+- Before live use, configure the Supabase Email template to render `{{ .Token }}`, confirm email delivery/SMTP, and add the production site URL to Auth URL configuration. These dashboard settings cannot be inspected through the connected Supabase management tools and remain an explicit release gate.
