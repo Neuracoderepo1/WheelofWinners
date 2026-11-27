@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const sampleRewards = [
   { name: "Grocery essentials voucher", category: "Everyday", points: "1,200 pts", stock: "Sample listing" },
   { name: "Home and kitchen bundle", category: "Home", points: "3,500 pts", stock: "Sample listing" },
@@ -14,7 +16,7 @@ export default function HomePage() {
   return (
     <main>
       <header className="topbar">
-        <a className="brand" href="/" aria-label="WheelofWinners home"><span className="brand-mark">W</span> WheelofWinners</a>
+        <Link className="brand" href="/" aria-label="WheelofWinners home"><span className="brand-mark">W</span> WheelofWinners</Link>
         <nav aria-label="Main navigation">
           <a href="#how-it-works">How it works</a>
           <a href="#rewards">Rewards</a>
@@ -71,7 +73,7 @@ export default function HomePage() {
 
       <section className="closing" id="get-started"><div><p className="eyebrow">Built around clarity</p><h2>Your points.<br /><em>Your choice.</em></h2><p>When the platform opens, every reward will show exactly what it costs and how it gets to you.</p></div><div className="closing-stamp">GOOD<br />THINGS<br /><span>ADD UP</span> ✳</div></section>
 
-      <footer><a className="brand" href="/"><span className="brand-mark">W</span> WheelofWinners</a><span>Earn fairly. Redeem clearly.</span><span>© {new Date().getFullYear()} WheelofWinners</span></footer>
+      <footer><Link className="brand" href="/"><span className="brand-mark">W</span> WheelofWinners</Link><span>Earn fairly. Redeem clearly.</span><span>© {new Date().getFullYear()} WheelofWinners</span></footer>
     </main>
   );
 }
