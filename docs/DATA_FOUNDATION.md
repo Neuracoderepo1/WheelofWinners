@@ -11,7 +11,7 @@ Recorded live migration history:
 - 20261127090025 wheelofwinners_foreign_key_indexes
 - 20261127091705 wheelofwinners_supabase_auth_identity
 - 20261127091930 wheelofwinners_transactional_rewards
-- 202611270920xx wheelofwinners_server_only_redemption_rpc (exact version recorded in live migration history)
+- 20261127092011 wheelofwinners_server_only_redemption_rpc
 
 The repository migration files are maintained as the reviewable source counterpart. The second migration adds ten foreign-key indexes verified against the live catalog. No secrets or credentials belong in this repository.
 
@@ -38,7 +38,7 @@ The migrations target PostgreSQL 15+. The Auth identity migration is applied and
 
 ## Not implemented
 
-This schema does not yet implement the transactional earning/redemption service, membership authorization policies, provider signature adapters, campaign cap enforcement, vendor state-transition authorization, inventory reservation RPC, or reconciliation jobs. No production users, campaigns, points, rewards, or redemptions have been seeded. Do not treat this foundation as production-ready.
+The database now contains transactional award and redemption RPCs, but the application API that safely invokes them is not implemented. The award RPC is executable only by `service_role` and assumes the calling server has already verified provider authenticity, freshness, and campaign mapping. It serializes campaign caps, rejects inactive users and unapproved advertisers, deduplicates provider events, and writes the verified event, ledger credit, and audit event atomically. The redemption RPC is also `service_role`-only; the application server must verify the user's Auth session and derive the user ID before calling it. It locks the consumer profile and reward/inventory, checks active account, published reward, approved vendor, available stock and ledger balance, then creates the redemption, debit, inventory reservation, event, and audit row in one transaction. Retries with the same consumer/idempotency key return the existing redemption. The server API, provider signature adapters, membership authorization policies, vendor state-transition authorization, cancellation/reversal workflows, and reconciliation jobs remain unimplemented. No production users, campaigns, points, rewards, or redemptions have been seeded. Do not treat this foundation as production-ready.
 
 ## Transactional RPC security boundary
 
