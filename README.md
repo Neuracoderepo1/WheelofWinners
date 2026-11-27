@@ -53,11 +53,11 @@ This repository is being initialized. These first commits establish the product 
 - The deterministic loyalty schema and six Supabase migrations are applied to the selected development project.
 - Supabase Auth profile linking is in place.
 - Transactional, idempotent points-award and fixed-price redemption database functions are restricted to the server `service_role`. Partial unique indexes enforce one earn per verified event and one debit per redemption.
-- A server-side redemption endpoint is available at `POST /api/rewards/{rewardId}/redeem`. It validates the bearer token with Supabase Auth and derives the consumer ID from the verified user record.
+- Server routes provide `GET /api/rewards`, authenticated `GET /api/me/points`, and authenticated `POST /api/rewards/{rewardId}/redeem`. User identity is derived from Supabase Auth verification on the server.
 - No users, campaigns, points, rewards, or redemptions have been seeded. The UI remains illustrative and the platform is not production-ready.
 
 ### Local server configuration
 
 Copy `.env.example` to `.env.local` and set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`. The service-role key is server-only. Never use a `NEXT_PUBLIC_` prefix for it or commit real credentials.
 
-The redemption endpoint expects an Authorization bearer token and a JSON body containing an `idempotencyKey`. The caller must reuse the same key when retrying the same redemption request. Authentication UI, reward catalogue/balance APIs, provider verification, rate limiting, and end-to-end redemption tests remain outstanding.
+The redemption endpoint expects an Authorization bearer token and a JSON body containing an `idempotencyKey`. The caller must reuse the same key when retrying the same redemption request. Authentication UI/session lifecycle, provider verification, vendor/advertiser operations, rate limiting, and end-to-end integration tests remain outstanding.
