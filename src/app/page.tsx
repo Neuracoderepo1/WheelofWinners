@@ -19,7 +19,7 @@ export default function HomePage() {
         <Link className="brand" href="/" aria-label="WheelofWinners home"><span className="brand-mark">W</span> WheelofWinners</Link>
         <nav aria-label="Main navigation">
           <a href="#how-it-works">How it works</a>
-          <a href="#rewards">Rewards</a>
+          <Link href="/rewards">Rewards</Link>
           <Link className="nav-cta" href="/auth">Sign in / Join</Link>
         </nav>
       </header>
@@ -30,7 +30,7 @@ export default function HomePage() {
           <h1>Good engagement.<br /><em>Real rewards.</em></h1>
           <p className="hero-text">Discover brand campaigns, earn points through eligible activities, and redeem them for rewards with clear prices and terms.</p>
           <div className="hero-actions">
-            <a className="button button-primary" href="#rewards">Explore rewards <span aria-hidden="true">↗</span></a>
+            <Link className="button button-primary" href="/rewards">Explore rewards <span aria-hidden="true">↗</span></Link>
             <Link className="text-link" href="/auth">Create your account</Link>
           </div>
           <p className="micro-note">No random draws. No paid entries. Just transparent rewards.</p>
