@@ -78,3 +78,40 @@ export async function callRedemptionRpc(input: {
   }
   return { ok: false, code: "REDEMPTION_FAILED" };
 }
+
+export async function callPublicRewardsRpc(): Promise<{ ok: true; result: unknown } | { ok: false }> {
+  const { url, serviceRoleKey } = getSupabaseConfig();
+  const response = await fetch(`${url}/rest/v1/rpc/list_published_rewards`, {
+    method: "POST",
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      "Content-Type": "application/json",
+    },
+    body: "{}",
+    cache: "no-store",
+  });
+  if (!response.ok) return { ok: false };
+  return { ok: true, result: await response.json() as unknown };
+}
+
+export async function callPointsBalanceRpc(userId: string): Promise<{ ok: true; result: unknown } | { ok: false; code: string }> {
+  const { url, serviceRoleKey } = getSupabaseConfig();
+  const response = await fetch(`${url}/rest/v1/rpc/get_points_balance`, {
+    method: "POST",
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ p_user_id: userId }),
+    cache: "no-store",
+  });
+  if (response.ok) return { ok: true, result: await response.json() as unknown };
+
+  const error: unknown = await response.json().catch(() => null);
+  if (typeof error === "object" && error !== null && "code" in error && typeof error.code === "string") {
+    return { ok: false, code: error.code };
+  }
+  return { ok: false, code: "BALANCE_LOOKUP_FAILED" };
+}
