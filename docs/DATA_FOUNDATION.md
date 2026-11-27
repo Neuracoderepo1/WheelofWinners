@@ -4,7 +4,7 @@ This migration establishes the first relational model for WheelofWinners as a de
 
 ## Live database status
 
-The schema baseline and foreign-key index completion have been applied to the explicitly selected Supabase project AD2EARN promotional games (project reference mbnpbihlawrnjkwduvjo).
+The schema baseline, foreign-key indexes, identity mapping, transactional RPCs, and ledger uniqueness safeguards have been applied to the explicitly selected Supabase project AD2EARN promotional games (project reference mbnpbihlawrnjkwduvjo).
 
 Recorded live migration history:
 - 20261127090012 wheelofwinners_initial_loyalty_foundation
@@ -12,6 +12,7 @@ Recorded live migration history:
 - 20261127091705 wheelofwinners_supabase_auth_identity
 - 20261127091930 wheelofwinners_transactional_rewards
 - 20261127092011 wheelofwinners_server_only_redemption_rpc
+- 20261127092258 wheelofwinners_ledger_effect_uniqueness
 
 The repository migration files are maintained as the reviewable source counterpart. The second migration adds ten foreign-key indexes verified against the live catalog. No secrets or credentials belong in this repository.
 
@@ -22,6 +23,7 @@ The repository migration files are maintained as the reviewable source counterpa
 - 003_supabase_auth_identity.sql: links `profiles.id` to `auth.users(id)` with `ON DELETE CASCADE` and creates a minimal profile row from a server-side Auth insert trigger.
 - 004_transactional_rewards.sql: adds an idempotent, cap-enforcing server-only engagement award function and an atomic fixed-price redemption function.
 - 005_server_only_redemption_rpc.sql: tightens redemption execution to `service_role` only. The application server must verify the user's Auth session and derive the user ID before calling it; never accept a user ID from browser input.
+- 006_ledger_effect_uniqueness.sql: adds partial unique indexes to ensure one earning ledger entry per verified event and one redemption debit per redemption.
 
 The migrations target PostgreSQL 15+. The Auth identity migration is applied and catalog-verified: the profile foreign key and Auth user trigger both exist. The project currently has zero Auth users and zero profile rows, so no user data was backfilled.
 
@@ -30,7 +32,7 @@ The migrations target PostgreSQL 15+. The Auth identity migration is applied and
 - Row-level security is enabled on all 12 application tables. No permissive client policies are created. Direct client access remains denied until reviewed policies or server-only access paths are deliberately added.
 - Supabase Security Advisor currently reports 12 informational rls_enabled_no_policy findings. This is expected from the deliberate deny-by-default posture, but it is not a completed authorization design.
 - A verified engagement event must be recorded only after a trusted server adapter validates provider authenticity, event freshness, campaign mapping, and replay protection.
-- Provider event IDs and redemption idempotency keys are unique.
+- Provider event IDs and redemption idempotency keys are unique. Partial unique indexes also prevent multiple earn entries for one verified event or multiple debit entries for one redemption.
 - Points are represented as ledger deltas. Corrections use compensating entries, never edits or deletes. The trigger is a database guard, not protection against privileged operators who can alter schema or disable triggers.
 - Reward prices are fixed integer point costs. Inventory distinguishes reserved and fulfilled stock.
 - No cash balance, transfer, cash-out, paid entry, spin, draw, or random reward allocation is represented.
