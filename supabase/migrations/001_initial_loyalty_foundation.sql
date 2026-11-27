@@ -22,7 +22,8 @@ create table public.organizations (
   legal_name text not null check (length(trim(legal_name)) between 2 and 200),
   status text not null default 'pending'
     check (status in ('pending', 'approved', 'suspended', 'closed')),
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  unique (id, organization_type)
 );
 
 create table public.organization_memberships (
@@ -36,7 +37,8 @@ create table public.organization_memberships (
 
 create table public.campaigns (
   id uuid primary key default gen_random_uuid(),
-  advertiser_organization_id uuid not null references public.organizations(id),
+  advertiser_organization_id uuid not null,
+  advertiser_organization_type text generated always as ('advertiser') stored,
   title text not null check (length(trim(title)) between 3 and 160),
   description text not null default '',
   status text not null default 'draft'
@@ -47,7 +49,9 @@ create table public.campaigns (
   per_user_limit integer check (per_user_limit is null or per_user_limit > 0),
   total_event_limit integer check (total_event_limit is null or total_event_limit > 0),
   created_at timestamptz not null default now(),
-  check (ends_at is null or starts_at is null or ends_at > starts_at)
+  check (ends_at is null or starts_at is null or ends_at > starts_at),
+  foreign key (advertiser_organization_id, advertiser_organization_type)
+    references public.organizations(id, organization_type)
 );
 
 create table public.campaign_provider_configs (
@@ -97,7 +101,8 @@ create table public.points_ledger (
 
 create table public.rewards (
   id uuid primary key default gen_random_uuid(),
-  vendor_organization_id uuid not null references public.organizations(id),
+  vendor_organization_id uuid not null,
+  vendor_organization_type text generated always as ('vendor') stored,
   title text not null check (length(trim(title)) between 2 and 160),
   description text not null default '',
   points_cost integer not null check (points_cost > 0),
@@ -105,7 +110,9 @@ create table public.rewards (
     check (status in ('draft', 'pending_review', 'published', 'paused', 'retired')),
   eligibility_text text not null default '',
   fulfilment_terms text not null default '',
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  foreign key (vendor_organization_id, vendor_organization_type)
+    references public.organizations(id, organization_type)
 );
 
 create table public.reward_inventory (
