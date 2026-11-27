@@ -68,3 +68,29 @@ footer{max-width:1200px;margin:auto;padding:30px 34px;display:flex;justify-conte
 footer .brand{font-size:13px;color:var(--ink)}
 @media(max-width:700px){.topbar{height:70px;padding:0 20px}nav{gap:15px}nav a:not(.nav-cta){display:none}.hero{grid-template-columns:1fr;padding:55px 25px 55px;gap:5px}.hero-art{height:340px;transform:scale(.9)}.trust-strip{gap:13px 22px;font-size:10px}.section{padding:68px 22px}.steps-grid,.reward-grid{grid-template-columns:1fr}.step{min-height:0}.reward-heading{align-items:flex-start;gap:15px;flex-direction:column}.closing{padding:55px 25px}.closing h2{font-size:43px}.closing-stamp{width:105px;height:105px;font-size:11px}footer{padding:25px 20px;gap:15px;flex-wrap:wrap}footer>span:nth-child(2){display:none}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Email OTP account experience */
+.auth-shell{min-height:100vh;background:radial-gradient(circle at 80% 15%,#e9f0dc 0,transparent 34%),var(--paper)}
+.auth-topbar{max-width:1100px}
+.auth-card{width:min(100% - 36px,520px);margin:54px auto 90px;padding:42px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 22px 70px #263b2910}
+.auth-card h1{font-size:clamp(42px,8vw,58px);line-height:1.05;margin:20px 0 14px}
+.auth-intro{font-size:14px;line-height:1.8;color:var(--muted);margin-bottom:28px}
+.auth-form{display:grid;gap:11px}
+.auth-form label{font-size:12px;font-weight:700;color:#425347}
+.auth-form input{width:100%;height:52px;border:1px solid #d9e1d5;border-radius:8px;padding:0 15px;font:500 15px 'DM Sans',sans-serif;color:var(--ink);outline:none;background:#fcfdfb}
+.auth-form input:focus{border-color:#729653;box-shadow:0 0 0 3px #c8f16955}
+.auth-form input#otp{text-align:center;letter-spacing:10px;font-size:22px;font-weight:700}
+.auth-submit{width:100%;justify-content:center;border:0;margin-top:10px;cursor:pointer;font-family:inherit}
+.auth-submit:disabled{opacity:.55;cursor:not-allowed}
+.auth-secondary{border:0;background:transparent;color:#567b43;font:700 12px 'DM Sans',sans-serif;padding:12px;cursor:pointer}
+.auth-message,.auth-error{font-size:12px;line-height:1.6;padding:12px 14px;border-radius:8px;margin:18px 0 0}
+.auth-message{background:#edf5e7;color:#3d6332}
+.auth-error{background:#fff0ed;color:#9b3c2f}
+.auth-footnote{font-size:10px;line-height:1.7;color:#89938a;margin:25px 0 0}
+.account-panel{display:grid;gap:10px;padding:20px;background:#f5f8f1;border:1px solid var(--line);border-radius:10px}
+.account-label{font-size:9px;letter-spacing:1.3px;font-weight:700;color:#7b897b;margin-top:5px}
+.account-panel strong{font-size:14px;overflow-wrap:anywhere}
+.account-panel .points-value{font:800 32px Manrope,sans-serif;color:#557c3e}
+.account-panel p{font-size:11px;line-height:1.7;color:var(--muted);margin:5px 0 0}
+.auth-home-cta{margin-top:22px}
+@media(max-width:600px){.auth-card{padding:30px 23px;margin-top:28px}.auth-topbar{padding:0 20px}}
