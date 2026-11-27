@@ -12,6 +12,15 @@ const steps = [
   ["03", "Redeem", "Choose a listed reward and see its exact cost and availability before confirming."],
 ];
 
+const wheelLabels = [
+  ["DIGITAL", "wheel-label-digital"],
+  ["EVERYDAY", "wheel-label-everyday"],
+  ["HOME", "wheel-label-home"],
+  ["LEARNING", "wheel-label-learning"],
+  ["LIFESTYLE", "wheel-label-lifestyle"],
+  ["EXPERIENCES", "wheel-label-experiences"],
+];
+
 export default function HomePage() {
   return (
     <main>
@@ -24,33 +33,34 @@ export default function HomePage() {
         </nav>
       </header>
 
-      <section className="hero">
+      <section className="hero wheel-hero">
         <div className="hero-copy">
-          <p className="eyebrow"><span className="dot" /> A clearer kind of rewards club</p>
-          <h1>Good engagement.<br /><em>Real rewards.</em></h1>
-          <p className="hero-text">Discover brand campaigns, earn points through eligible activities, and redeem them for rewards with clear prices and terms.</p>
+          <p className="eyebrow"><span className="dot" /> YOUR REWARD JOURNEY STARTS HERE</p>
+          <h1>Find your next<br /><em>good thing.</em></h1>
+          <p className="hero-text">Explore reward categories, complete eligible brand activities, earn verified points, and choose exactly what you want from the marketplace.</p>
           <div className="hero-actions">
-            <Link className="button button-primary" href="/rewards">Explore rewards <span aria-hidden="true">↗</span></Link>
+            <Link className="button button-primary" href="/rewards">Explore all rewards <span aria-hidden="true">↗</span></Link>
             <Link className="text-link" href="/auth">Create your account</Link>
           </div>
-          <p className="micro-note">No random draws. No paid entries. Just transparent rewards.</p>
+          <p className="micro-note">Every segment is a category, not a random prize. No paid entries or chance-based awards.</p>
         </div>
-        <div className="hero-art" aria-label="Illustration of a gift box and reward cards">
-          <div className="orbit orbit-one" />
-          <div className="orbit orbit-two" />
-          <div className="gift-card">
-            <div className="gift-spark">✳</div>
-            <div className="gift-box"><span /><i /></div>
-            <p>YOUR NEXT<br /><strong>GOOD THING</strong></p>
-            <small>Earn it. Choose it. Enjoy it.</small>
+        <div className="wheel-stage">
+          <div className="wheel-caption"><span className="wheel-caption-dot" /> THE REWARDS WHEEL</div>
+          <div className="wheel-pointer" aria-hidden="true" />
+          <div className="wheel-disk" role="img" aria-label="Six reward categories: Digital, Everyday, Home, Learning, Lifestyle and Experiences">
+            {wheelLabels.map(([label, className]) => <span className={`wheel-label ${className}`} key={label}>{label}</span>)}
+            <span className="wheel-center-decoration" aria-hidden="true">W</span>
           </div>
-          <div className="floating-tag tag-top">✦ Points with purpose</div>
-          <div className="floating-tag tag-bottom">✓ Clear reward terms</div>
+          <Link className="wheel-hub" href="/rewards" aria-label="Explore the rewards marketplace">
+            <span>EXPLORE</span><strong>REWARDS</strong><small>Choose your path ↗</small>
+          </Link>
+          <div className="wheel-note wheel-note-top">✦ Six ways to explore</div>
+          <div className="wheel-note wheel-note-bottom">✓ Clear terms. Real choices.</div>
         </div>
       </section>
 
       <section className="trust-strip" aria-label="Platform principles">
-        <span>Transparent point values</span><span>Verified activities</span><span>Guaranteed listed rewards</span><span>Vendor-backed fulfilment</span>
+        <span>Transparent point values</span><span>Verified activities</span><span>Published reward terms</span><span>Vendor-backed fulfilment</span>
       </section>
 
       <section className="section how-section" id="how-it-works">
@@ -71,7 +81,7 @@ export default function HomePage() {
         <p className="disclaimer">These are sample concepts, not live offers. No rewards, inventory, or point balances are currently connected.</p>
       </section>
 
-      <section className="closing" id="get-started"><div><p className="eyebrow">Built around clarity</p><h2>Your points.<br /><em>Your choice.</em></h2><p>When the platform opens, every reward will show exactly what it costs and how it gets to you.</p><Link className="button button-primary auth-home-cta" href="/auth">Join the rewards club <span aria-hidden="true">↗</span></Link></div><div className="closing-stamp">GOOD<br />THINGS<br /><span>ADD UP</span> ✳</div></section>
+      <section className="closing" id="get-started"><div><p className="eyebrow">Built around clarity</p><h2>Your points.<br /><em>Your choice.</em></h2><p>Every reward will show exactly what it costs, whether it is available, and how it gets to you.</p><Link className="button button-primary auth-home-cta" href="/auth">Join the rewards club <span aria-hidden="true">↗</span></Link></div><div className="closing-stamp">GOOD<br />THINGS<br /><span>ADD UP</span> ✳</div></section>
 
       <footer><Link className="brand" href="/"><span className="brand-mark">W</span> WheelofWinners</Link><span>Earn fairly. Redeem clearly.</span><span>© {new Date().getFullYear()} WheelofWinners</span></footer>
     </main>
