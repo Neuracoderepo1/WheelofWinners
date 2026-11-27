@@ -56,6 +56,14 @@ begin
     raise exception 'account_not_eligible' using errcode = '42501';
   end if;
 
+  if not exists (
+    select 1 from public.organizations o
+    where o.id = v_campaign.advertiser_organization_id
+      and o.organization_type = 'advertiser' and o.status = 'approved'
+  ) then
+    raise exception 'advertiser_not_approved' using errcode = '42501';
+  end if;
+
   if v_campaign.status <> 'active'
      or (v_campaign.starts_at is not null and v_campaign.starts_at > pg_catalog.now())
      or (v_campaign.ends_at is not null and v_campaign.ends_at <= pg_catalog.now())
@@ -187,6 +195,13 @@ begin
 
   if not found or v_reward.status <> 'published' then
     raise exception 'reward_unavailable' using errcode = 'P0002';
+  end if;
+  if not exists (
+    select 1 from public.organizations o
+    where o.id = v_reward.vendor_organization_id
+      and o.organization_type = 'vendor' and o.status = 'approved'
+  ) then
+    raise exception 'vendor_not_approved' using errcode = '42501';
   end if;
 
   select * into v_inventory
