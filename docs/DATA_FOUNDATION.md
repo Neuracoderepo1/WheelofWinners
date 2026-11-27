@@ -15,6 +15,7 @@ Recorded live migration history:
 - 20261127092258 wheelofwinners_ledger_effect_uniqueness
 - 20261127092401 wheelofwinners_consumer_read_apis
 - 20261127092608 wheelofwinners_reject_future_engagement_events
+- 20261127092752 wheelofwinners_lock_organization_eligibility
 
 The repository migration files are maintained as the reviewable source counterpart. The second migration adds ten foreign-key indexes verified against the live catalog. No secrets or credentials belong in this repository.
 
@@ -28,6 +29,7 @@ The repository migration files are maintained as the reviewable source counterpa
 - 006_ledger_effect_uniqueness.sql: adds partial unique indexes to ensure one earning ledger entry per verified event and one redemption debit per redemption.
 - 007_consumer_read_apis.sql: adds server-role-only catalogue and points-balance functions.
 - 008_reject_future_engagement_events.sql: adds a database-side rejection for future-dated provider events.
+- 009_lock_organization_eligibility.sql: takes shared locks on approved advertiser/vendor rows during award and redemption operations to serialize against concurrent suspension.
 - 009_lock_organization_eligibility.sql: locks approved advertiser/vendor organization rows while awarding or redeeming, preventing concurrent suspension from racing the eligibility check.
 
 The migrations target PostgreSQL 15+. The Auth identity migration is applied and catalog-verified: the profile foreign key and Auth user trigger both exist. The project currently has zero Auth users and zero profile rows, so no user data was backfilled.
