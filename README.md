@@ -50,9 +50,9 @@ This repository is being initialized. These first commits establish the product 
 
 ## Current engineering status
 
-- The deterministic loyalty schema and five Supabase migrations are applied to the selected development project.
+- The deterministic loyalty schema and six Supabase migrations are applied to the selected development project.
 - Supabase Auth profile linking is in place.
-- Transactional, idempotent points-award and fixed-price redemption database functions are restricted to the server `service_role`.
+- Transactional, idempotent points-award and fixed-price redemption database functions are restricted to the server `service_role`. Partial unique indexes enforce one earn per verified event and one debit per redemption.
 - A server-side redemption endpoint is available at `POST /api/rewards/{rewardId}/redeem`. It validates the bearer token with Supabase Auth and derives the consumer ID from the verified user record.
 - No users, campaigns, points, rewards, or redemptions have been seeded. The UI remains illustrative and the platform is not production-ready.
 
