@@ -13,6 +13,7 @@ Recorded live migration history:
 - 20261127091930 wheelofwinners_transactional_rewards
 - 20261127092011 wheelofwinners_server_only_redemption_rpc
 - 20261127092258 wheelofwinners_ledger_effect_uniqueness
+- 2026112709xxxx wheelofwinners_consumer_read_apis (exact version recorded in live migration history)
 
 The repository migration files are maintained as the reviewable source counterpart. The second migration adds ten foreign-key indexes verified against the live catalog. No secrets or credentials belong in this repository.
 
@@ -24,6 +25,7 @@ The repository migration files are maintained as the reviewable source counterpa
 - 004_transactional_rewards.sql: adds an idempotent, cap-enforcing server-only engagement award function and an atomic fixed-price redemption function.
 - 005_server_only_redemption_rpc.sql: tightens redemption execution to `service_role` only. The application server must verify the user's Auth session and derive the user ID before calling it; never accept a user ID from browser input.
 - 006_ledger_effect_uniqueness.sql: adds partial unique indexes to ensure one earning ledger entry per verified event and one redemption debit per redemption.
+- 007_consumer_read_apis.sql: adds server-role-only catalogue and points-balance functions.
 
 The migrations target PostgreSQL 15+. The Auth identity migration is applied and catalog-verified: the profile foreign key and Auth user trigger both exist. The project currently has zero Auth users and zero profile rows, so no user data was backfilled.
 
@@ -42,7 +44,7 @@ The migrations target PostgreSQL 15+. The Auth identity migration is applied and
 
 The database contains transactional award and redemption RPCs. A server-side redemption route now exists at `POST /api/rewards/{rewardId}/redeem`: it validates the bearer token through Supabase Auth, derives the user ID from the verified Auth response, and calls the `service_role`-only RPC. The route never trusts a client-supplied user ID. It requires `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` as server environment variables; the service-role key must never be exposed to browser code. The route has not yet been exercised end-to-end against an authenticated user or seeded reward.
 
-The award RPC remains callable only by `service_role` and assumes the calling server has already verified provider authenticity, freshness, and campaign mapping. It serializes campaign caps, rejects inactive users and unapproved advertisers, deduplicates provider events, and writes the verified event, ledger credit, and audit event atomically. The redemption RPC locks the consumer profile and reward/inventory, checks active account, published reward, approved vendor, available stock and ledger balance, then creates the redemption, debit, inventory reservation, event, and audit row in one transaction. Retries with the same consumer/idempotency key return the existing redemption. Consumer sign-in UI/session lifecycle, reward catalogue and balance APIs, provider signature adapters, membership authorization policies, vendor state-transition authorization, cancellation/reversal workflows, rate limiting, and reconciliation jobs remain unimplemented. No production users, campaigns, points, rewards, or redemptions have been seeded. Do not treat this foundation as production-ready.
+The award RPC remains callable only by `service_role` and assumes the calling server has already verified provider authenticity, freshness, and campaign mapping. It serializes campaign caps, rejects inactive users and unapproved advertisers, deduplicates provider events, and writes the verified event, ledger credit, and audit event atomically. The redemption RPC locks the consumer profile and reward/inventory, checks active account, published reward, approved vendor, available stock and ledger balance, then creates the redemption, debit, inventory reservation, event, and audit row in one transaction. Retries with the same consumer/idempotency key return the existing redemption. Consumer sign-in UI/session lifecycle, provider signature adapters, membership authorization policies, vendor state-transition authorization, cancellation/reversal workflows, rate limiting, and reconciliation jobs remain unimplemented. Server routes for the published rewards catalogue, authenticated points balance, and redemption are implemented but require end-to-end tests. No production users, campaigns, points, rewards, or redemptions have been seeded. Do not treat this foundation as production-ready.
 
 ## Transactional RPC security boundary
 
