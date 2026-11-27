@@ -46,3 +46,18 @@ The product must not implement spins for prizes, random winners, prize draws, lo
 
 ## Repository status
 This repository is being initialized. These first commits establish the product boundary, architecture, security model, and delivery sequence. No production system, vendor integrations, ad-provider callbacks, or fulfilment integrations are implied until implemented and verified.
+
+
+## Current engineering status
+
+- The deterministic loyalty schema and five Supabase migrations are applied to the selected development project.
+- Supabase Auth profile linking is in place.
+- Transactional, idempotent points-award and fixed-price redemption database functions are restricted to the server `service_role`.
+- A server-side redemption endpoint is available at `POST /api/rewards/{rewardId}/redeem`. It validates the bearer token with Supabase Auth and derives the consumer ID from the verified user record.
+- No users, campaigns, points, rewards, or redemptions have been seeded. The UI remains illustrative and the platform is not production-ready.
+
+### Local server configuration
+
+Copy `.env.example` to `.env.local` and set `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY`. The service-role key is server-only. Never use a `NEXT_PUBLIC_` prefix for it or commit real credentials.
+
+The redemption endpoint expects an Authorization bearer token and a JSON body containing an `idempotencyKey`. The caller must reuse the same key when retrying the same redemption request. Authentication UI, reward catalogue/balance APIs, provider verification, rate limiting, and end-to-end redemption tests remain outstanding.
